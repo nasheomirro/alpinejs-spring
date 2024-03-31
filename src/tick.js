@@ -13,7 +13,7 @@ export function tick_spring(ctx, last_value, current_value, target_value) {
       Math.abs(d) < ctx.opts.precision &&
       Math.abs(delta) < ctx.opts.precision
     ) {
-      return target_value; // settled
+      return target_value; // settled, the animation should stop
     } else {
       ctx.settled = false; // signal loop to keep ticking
       return is_date(current_value)

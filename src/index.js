@@ -2,12 +2,12 @@ import { tick_spring } from "./tick";
 import { loop, raf } from "./timing";
 
 export default function (Alpine) {
-  Alpine.data(
-    "spring",
-    (value, { stiffness = 0.15, damping = 0.8, precision = 0.01 } = {}) => {
+  Alpine.magic("spring", (el, { Alpine }) => {
+    return (value = undefined, opts = {}) => {
+      const { stiffness = 0.15, damping = 0.8, precision = 0.01 } = opts;
+
       let last_time;
       let task;
-      let current_token;
       let last_value = value;
       let target_value = value;
 
@@ -15,34 +15,43 @@ export default function (Alpine) {
       let inv_mass_recovery_rate = 0;
       let cancel_task = false;
 
+      // make sure we cancel any ongoing animations when destroyed
+      Alpine.onElRemoved(el, () => {
+        cancel_task = true;
+        task = null;
+      });
+
       function set(new_value, opts = {}) {
         target_value = new_value;
-        const token = (current_token = {});
+
         if (
           value == null ||
           opts.hard ||
           (this.stiffness >= 1 && this.damping >= 1)
         ) {
-          cancel_task = true; // cancel any running animation
+          cancel_task = true; // cancel any runnning animation
           last_time = raf.now();
-          last_value = new_value;
+          last_value = target_value;
           this.value = value = target_value;
-          return Promise.resolve();
+          return;
         } else if (opts.soft) {
           const rate = opts.soft === true ? 0.5 : +opts.soft;
           inv_mass_recovery_rate = 1 / (rate * 60);
-          inv_mass = 0; // infinite mass, unaffected by spring forces
+          inv_mass = 0; // infinite mass makes it unaffected by spring forces
         }
 
         if (!task) {
           last_time = raf.now();
           cancel_task = false;
+
           task = loop((now) => {
             if (cancel_task) {
               cancel_task = false;
               task = null;
               return false;
             }
+
+            // gradually recover mass if `soft` was given
             inv_mass = Math.min(inv_mass + inv_mass_recovery_rate, 1);
             const ctx = {
               inv_mass,
@@ -57,9 +66,12 @@ export default function (Alpine) {
               value,
               target_value
             );
+
             last_time = now;
             last_value = value;
             this.value = value = next_value;
+
+            // check if tick spring has determined it's finished
             if (ctx.settled) {
               task = null;
             }
@@ -67,26 +79,10 @@ export default function (Alpine) {
             return !ctx.settled;
           });
         }
-
-        return new Promise((fullfill) => {
-          if (token === current_token) fullfill();
-        });
       }
 
       const spring = {
-        _value: value,
-        get value() {
-          return this._value;
-        },
-        set value(v) {
-          if (typeof v === "object") {
-            Object.keys(v).forEach((key) => {
-              this._value[key] = v[key];
-            });
-          } else {
-            this._value = v;
-          }
-        },
+        value,
         set,
         update(fn, opts) {
           return this.set(fn(target_value, value), opts);
@@ -97,6 +93,6 @@ export default function (Alpine) {
       };
 
       return spring;
-    }
-  );
+    };
+  });
 }

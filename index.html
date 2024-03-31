@@ -12,10 +12,13 @@
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body>
-  <div x-data="spring(0)" class="h-40" @mousemove="set($event.clientX / $el.offsetWidth * 100)">
-    <div class="bg-blue-600 h-40" :style="{ width: `${value}%` }"></div>
-  </div>
+<body x-data="{ n: true }">
+  <button @click="setTimeout(() => n = !n, 1000)">toggle</button>
+  <template x-if="n">
+    <div x-spring x-data="{ x: $spring(0) }" class="h-40" @mousemove="x.set(($event.clientX / $el.offsetWidth) * 100)">
+      <div x-init="console.log($data)" class="bg-blue-600 h-40" :style="{ width: `${Math.abs(x.value)}%` }"></div>
+    </div>
+  </template>
 </body>
 
 </html>
