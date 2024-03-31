@@ -1,12 +1,12 @@
 {
   "name": "alpinejs-spring",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "a simple plugin that provides a utility for calculating spring animations",
   "keywords": [
-    "Alpine",
     "Alpine JS",
     "Alpine JS Plugin",
-    "Alpine JS Plugins"
+    "Motion",
+    "Spring"
   ],
   "module": "dist/spring.esm.js",
   "unpkg": "dist/spring.min.js",
