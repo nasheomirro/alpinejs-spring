@@ -15,10 +15,13 @@
 <body x-data="{ n: true }">
   <button @click="setTimeout(() => n = !n, 1000)">toggle</button>
   <template x-if="n">
-    <div x-spring x-data="{ x: $spring(0) }" class="h-40" @mousemove="x.set(($event.clientX / $el.offsetWidth) * 100)">
+    <div x-data="{ x: $spring(0) }" class="h-40" @mousemove="x.set(($event.clientX / $el.offsetWidth) * 100)">
       <div x-init="console.log($data)" class="bg-blue-600 h-40" :style="{ width: `${Math.abs(x.value)}%` }"></div>
     </div>
   </template>
+
+  <div x-data="a"></div>
+  <div x-data="b"></div>
 </body>
 
 </html>
