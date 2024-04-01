@@ -4,6 +4,8 @@ A simple plugin that provides a utility for calculating spring-like motion. This
 
 All contributions are welcome. To maintain this project one needs a certain level of understanding Alpine's inner workings and an understanding of spring animations, both of which I currently lack. 🤷
 
+[Try it out here!](https://codepen.io/shanuthrii/pen/MWROjqW)
+
 ## Install
 
 ### With a CDN
