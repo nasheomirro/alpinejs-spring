@@ -41,37 +41,41 @@ Alpine.start();
 The plugin gives you a magic function `$spring`, this function would give you an object in which you can get and set the current values of the spring as well as it's configuration. To use this function simply pass it an initial value:
 
 ```html
+<div x-data="{ width: $spring(0) }"></div>
+```
+
+The initial value can be a number, an object, or an array, as long as all the object properties or array values are numbers:
+
+```html
+<div x-data="{ ball: $spring({ x: 0, y: 0 }) }"></div>
+```
+
+You can access the current value of the spring by using `[key].value`:
+
+```html
+<div x-data="{ width: $spring(0) }">
+  <div :style="{ width: Math.abs(width.value) + 'px' }"></div>
+</div>
+
+<div x-data="{ ball: $spring({ x: 0, y: 0 }) }">
+  <div :style="{ left: ball.value.x + 'px', top: ball.value.y + 'px' }"></div>
+</div>
+```
+
+### Setting the value
+
+To set the value, just call `[key].set()` and pass it the target value the spring should animate towards:
+
+```html
 <div
   x-data="{ width: $spring(0) }"
-  @mousemove="width.set($event.clientX / $el.offsetWidth * 100)"
+  @mousemove="width.set($event.clientX - $el.getBoundingClientRect().x)"
 >
   <div :style="{ width: Math.abs(width.value) + 'px' }"></div>
 </div>
 ```
 
-you can access the current value of the spring by using `[key].value`, and you can tell it to animate towards a target value by calling `[key].set()`.
-
-### Customizing the "springiness"
-
-You can pass a second argument to `$spring` which will dictate the "springiness" of the values:
-
-```html
-<div
-  x-data="{ width: $spring(0, { stiffness: 0.5, damping: 0.3, precision: 0.01 }) }"
-></div>
-```
-
-Each property expects a number between 0 to 1, you don't have to provide all the values, just the ones you want changed. Each property has a default value assigned.
-
-- `stiffness:` determines the "tightness" of the spring, where higher is tighter. Defaults to `0.15`
-- `damping:` determines how springy the spring is, the lower the value, the springier. Defaults to `0.8`
-- `precision:` determines how precise the spring will animate towards the target value, the lower the more precise. Defaults to `0.01`
-
-You can also edit these properties after initialization. These properties are accessible through `[key].[property]`.
-
-### Setting the value
-
-To set the value, just call `[key].set()` and pass it the target value the spring should animate towards. You can also pass a second argument to tell the spring how you want it animated:
+You can also pass a second argument to tell the spring how you want it animated:
 
 ```html
 <button @click="width.set(0, { hard: true })">reset</button>
@@ -90,6 +94,44 @@ You can also use the `[key].update()` function to set the values, but instead of
 this.width.update((target, value) => target / 50, { hard: true });
 ```
 
+#### Updating non-primitives
+
+To update objects or arrays, always pass the full object with all the expected keys:
+
+```html
+<button @click="ball.set({ x: 0, y: 0 })">reset</button>
+
+<!-- will not work -->
+<button @click="ball.set({ x: 0 })">reset</button>
+```
+
+💡 _Currently thinking of allowing partial updates, I'm leaning on just doing it shallowly, so nested objects still have to be given the full object. But in the meantime I don't see it as much of a nuisance, feel free to put up an issue if you'd like this feature._
+
+### Customizing the "springiness"
+
+You can pass a second argument to `$spring` which will dictate the "springiness" of the values:
+
+```html
+<div
+  x-data="{ width: $spring(0, { stiffness: 0.5, damping: 0.3, precision: 0.01 }) }"
+></div>
+```
+
+Each property expects a number between 0 to 1, you don't have to provide all the values, just the ones you want changed. Each property has a default value assigned.
+
+- `stiffness:` determines the "tightness" of the spring, where higher is tighter. Defaults to `0.15`
+- `damping:` determines how springy the spring is, the lower the value, the springier. Defaults to `0.8`
+- `precision:` determines how precise the spring will animate towards the target value, the lower the more precise. Defaults to `0.01`
+
+You can also edit these properties after initialization. These properties are accessible through `[key].[property]`:
+
+```html
+<!-- 0 is exclusive, unless you want it to infinitely slide or never move! -->
+<input type="range" min="0.01" max="1" step="0.01" x-model="width.stiffness" >
+<input type="range" min="0.01" max="1" step="0.01" x-model="width.damping" >
+<input type="range" min="0.01" max="1" step="0.01" x-model="width.precision" >
+```
+
 ## Pitfalls
 
 ### Values can go to the negatives
@@ -102,7 +144,9 @@ You can get access to the `$spring` magic by using a normal function instead of 
 
 ```js
 Alpine.data("collapsable", function () {
-  height: this.$spring(0);
+  return {
+    height: this.$spring(0);
+  }
 });
 ```
 
