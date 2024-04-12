@@ -1,6 +1,9 @@
 {
   "name": "alpinejs-spring",
-  "version": "0.0.4",
+  "version": "0.0.5",
+  "author": {
+    "name": "Shane Rimoro (nasheomirro)"
+  },
   "description": "a simple plugin that provides a utility for calculating spring animations",
   "keywords": [
     "Alpine JS",
@@ -15,5 +18,13 @@
   },
   "devDependencies": {
     "esbuild": "^0.16.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nasheomirro/alpinejs-spring.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nasheomirro/alpinejs-spring/issues"
   }
 }
